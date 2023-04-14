@@ -62,6 +62,10 @@ public class MainManager : MonoBehaviour
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
+            else if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                SceneManager.LoadScene(0);
+            }
         }
     }
 
@@ -86,29 +90,28 @@ public class MainManager : MonoBehaviour
 
         if (DataManager.Instance)
         {
-            DataManager.Instance.UpdateBestScore(m_Points);
+            DataManager.Instance.UpdateBestScores(m_Points);
             UpdateBestScoreText();
         }
     }
 
     private void UpdateBestScoreText()
     {
-        string name = "";
-        int score = 0;
+        BestScore bestScore = new BestScore();
 
         if (DataManager.Instance)
         {
-            name = DataManager.Instance.bestScore.Name;
-            score = DataManager.Instance.bestScore.Score;   
+            bestScore = DataManager.Instance.GetBestScore();
+
         }
 
-        if (string.IsNullOrEmpty(name))
+        if (string.IsNullOrEmpty(bestScore.Name))
         {
-            BestScoreText.text = $"Best Score : {score}";
+            BestScoreText.text = $"Best Score : {bestScore.Score}";
         }
         else
         {
-            BestScoreText.text = $"Best Score : {name} : {score}";
+            BestScoreText.text = $"Best Score : {bestScore.Name} : {bestScore.Score}";
         }
     }
 }

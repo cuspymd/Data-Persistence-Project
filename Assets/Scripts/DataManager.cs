@@ -8,6 +8,29 @@ public class BestScore
 {
     public string Name;
     public int Score;
+
+    public BestScore(string name, int score)
+    {
+        Name = name;
+        Score = score;
+    }
+
+    public BestScore()
+    {
+        Name = "";
+        Score = 0;
+    }
+}
+
+[System.Serializable]
+public class BestScoresData
+{
+    public List<BestScore> bestScores;
+
+    public BestScoresData(List<BestScore> bestScores)
+    {
+        this.bestScores = bestScores;
+    }
 }
 
 public class DataManager : MonoBehaviour
@@ -15,28 +38,47 @@ public class DataManager : MonoBehaviour
     public static DataManager Instance;
 
     public string Name;
-    public BestScore bestScore;
+    public List<BestScore> bestScores;
 
-    private string saveFilePath; 
+    private string saveFilePath;
+    private const int SCORE_NUM = 5;
 
-    public void UpdateBestScore(int score)
+    public void UpdateBestScores(int score)
     {
-        if (bestScore.Score < score)
+        if (score <= bestScores[SCORE_NUM-1].Score)
         {
-            bestScore.Score = score;
-            bestScore.Name = Name;
-
-            File.WriteAllText(saveFilePath, JsonUtility.ToJson(bestScore));
+            return;
         }
+
+        bestScores.Add(new BestScore(Name, score));
+        bestScores.Sort((a, b) => b.Score.CompareTo(a.Score));
+        bestScores.RemoveAt(SCORE_NUM);
+
+        BestScoresData bestScoresData = new BestScoresData(bestScores);
+        File.WriteAllText(saveFilePath, JsonUtility.ToJson(bestScoresData));
     }
 
-    public void LoadBestScore()
+    public void LoadBestScores()
     {
         if (File.Exists(saveFilePath))
         {
             string json = File.ReadAllText(saveFilePath);
-            bestScore = JsonUtility.FromJson<BestScore>(json);
+            var bestScoresData = JsonUtility.FromJson<BestScoresData>(json);
+            bestScores = bestScoresData.bestScores;
         }
+        else
+        {
+            bestScores = new List<BestScore>();
+            for (int i = 0; i < SCORE_NUM; i++)
+            {
+                bestScores.Add(new BestScore());
+            }
+        }
+    }
+
+    public BestScore GetBestScore()
+    {
+        return bestScores[0];
     }
 
     public void Awake()
@@ -50,6 +92,6 @@ public class DataManager : MonoBehaviour
         Instance = this;
         saveFilePath = Application.persistentDataPath + "/BestScore.json";
         DontDestroyOnLoad(gameObject);
-        LoadBestScore();
+        LoadBestScores();
     }
 }

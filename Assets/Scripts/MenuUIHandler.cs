@@ -38,6 +38,11 @@ public class MenuUIHandler : MonoBehaviour
 #endif
     }
 
+    public void GoToScoreScene()
+    {
+        SceneManager.LoadScene(2);
+    }
+
     public void OnNameEndEdit(string name)
     {
         Debug.Log($"Input name {name}");
@@ -46,7 +51,7 @@ public class MenuUIHandler : MonoBehaviour
 
     private void UpdateBestScoreText()
     {
-        BestScore bestScore = DataManager.Instance.bestScore;
+        BestScore bestScore = DataManager.Instance.GetBestScore();
 
         if (string.IsNullOrEmpty(bestScore.Name))
         {
