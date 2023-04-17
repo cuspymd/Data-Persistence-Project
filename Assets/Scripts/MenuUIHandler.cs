@@ -43,6 +43,11 @@ public class MenuUIHandler : MonoBehaviour
         SceneManager.LoadScene(2);
     }
 
+    public void GoToSettingsScene()
+    {
+        SceneManager.LoadScene(3);
+    }
+
     public void OnNameEndEdit(string name)
     {
         Debug.Log($"Input name {name}");

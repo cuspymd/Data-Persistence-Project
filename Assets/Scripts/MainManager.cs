@@ -9,6 +9,7 @@ public class MainManager : MonoBehaviour
     public Brick BrickPrefab;
     public int LineCount = 6;
     public Rigidbody Ball;
+    public static float maxBallSpeed = 2;
 
     public Text ScoreText;
     public Text BestScoreText;
@@ -39,6 +40,11 @@ public class MainManager : MonoBehaviour
 
         AddPoint(0);
         UpdateBestScoreText();
+        if (DataManager.Instance != null)
+        {
+            UpdateBallSpeed(DataManager.Instance.Difficulty);
+            RegisterDifficultyEvent();
+        }
     }
 
     private void Update()
@@ -113,5 +119,42 @@ public class MainManager : MonoBehaviour
         {
             BestScoreText.text = $"Best Score : {bestScore.Name} : {bestScore.Score}";
         }
+    }
+
+    public void UpdateBallSpeed(string difficulty)
+    {
+        if (difficulty == "Easy")
+        {
+            maxBallSpeed = 3;
+        }
+        else if (difficulty == "Normal")
+        {
+            maxBallSpeed = 6;
+        }
+        else if (difficulty == "Hard")
+        {
+            maxBallSpeed = 9;
+        }
+    }
+
+    private void RegisterDifficultyEvent() 
+    {
+        if (DataManager.Instance) 
+        {
+            DataManager.Instance.onDifficultyChanged += UpdateBallSpeed;
+        }
+    }
+
+    private void UnregisterDifficultyEvent()
+    {
+        if (DataManager.Instance)
+        {
+            DataManager.Instance.onDifficultyChanged -= UpdateBallSpeed;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        UnregisterDifficultyEvent();
     }
 }

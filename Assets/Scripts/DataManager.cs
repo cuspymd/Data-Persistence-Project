@@ -33,14 +33,30 @@ public class BestScoresData
     }
 }
 
+[System.Serializable]
+public class SettingsData
+{
+    public string Difficulty;
+
+    public SettingsData(string difficulty)
+    {
+        Difficulty = difficulty;
+    }
+}
+
 public class DataManager : MonoBehaviour
 {
     public static DataManager Instance;
 
     public string Name;
     public List<BestScore> bestScores;
+    public string Difficulty = "Normal";
 
-    private string saveFilePath;
+    public delegate void DifficultyEventHandler(string diffculty);
+    public event DifficultyEventHandler onDifficultyChanged;
+
+    private string saveScoreFilePath;
+    private string saveSettingsFilePath;
     private const int SCORE_NUM = 5;
 
     public void UpdateBestScores(int score)
@@ -55,14 +71,23 @@ public class DataManager : MonoBehaviour
         bestScores.RemoveAt(SCORE_NUM);
 
         BestScoresData bestScoresData = new BestScoresData(bestScores);
-        File.WriteAllText(saveFilePath, JsonUtility.ToJson(bestScoresData));
+        File.WriteAllText(saveScoreFilePath, JsonUtility.ToJson(bestScoresData));
+    }
+
+    public void SaveDifficulty(string difficulty)
+    {
+        Difficulty = difficulty;
+
+        SettingsData data = new SettingsData(Difficulty);
+        File.WriteAllText(saveSettingsFilePath, JsonUtility.ToJson(data));
+        onDifficultyChanged?.Invoke(Difficulty);
     }
 
     public void LoadBestScores()
     {
-        if (File.Exists(saveFilePath))
+        if (File.Exists(saveScoreFilePath))
         {
-            string json = File.ReadAllText(saveFilePath);
+            string json = File.ReadAllText(saveScoreFilePath);
             var bestScoresData = JsonUtility.FromJson<BestScoresData>(json);
             bestScores = bestScoresData.bestScores;
         }
@@ -73,6 +98,20 @@ public class DataManager : MonoBehaviour
             {
                 bestScores.Add(new BestScore());
             }
+        }
+    }
+
+    public void LoadSettings()
+    {
+        if (File.Exists(saveSettingsFilePath))
+        {
+            string json = File.ReadAllText(saveSettingsFilePath);
+            var settingsData = JsonUtility.FromJson<SettingsData>(json);
+            Difficulty = settingsData.Difficulty;
+        }
+        else
+        {
+            Difficulty = "Normal";
         }
     }
 
@@ -90,8 +129,10 @@ public class DataManager : MonoBehaviour
         }
 
         Instance = this;
-        saveFilePath = Application.persistentDataPath + "/BestScore.json";
+        saveScoreFilePath = Application.persistentDataPath + "/BestScore.json";
+        saveSettingsFilePath = Application.persistentDataPath + "/Settings.json";
         DontDestroyOnLoad(gameObject);
         LoadBestScores();
+        LoadSettings();
     }
 }

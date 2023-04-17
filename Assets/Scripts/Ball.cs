@@ -26,7 +26,7 @@ public class Ball : MonoBehaviour
         }
 
         //max velocity
-        if (velocity.magnitude > 3.0f)
+        if (velocity.magnitude > MainManager.maxBallSpeed)
         {
             velocity = velocity.normalized * 3.0f;
         }
